@@ -1,54 +1,118 @@
+<p align="center">
+  <img src="./assets/banner.svg" alt="The Glass Transformer — a real GPT with glass walls" width="100%" />
+</p>
+
+<p align="center">
+  <a href="https://himanshu-nakrani.github.io/glass-transformer/"><img alt="demo" src="https://img.shields.io/badge/demo-live-c3e88d?style=flat&labelColor=0a0b0f" /></a>
+  <a href="./src/model.js"><img alt="model" src="https://img.shields.io/badge/model-pure_JS-5ad1c8?style=flat&labelColor=0a0b0f" /></a>
+  <img alt="params" src="https://img.shields.io/badge/params-7%2C568-ffb347?style=flat&labelColor=0a0b0f" />
+  <img alt="runtime" src="https://img.shields.io/badge/runtime-browser-b18cff?style=flat&labelColor=0a0b0f" />
+  <img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=61DAFB&labelColor=0a0b0f&color=13151c" />
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite&logoColor=646CFF&labelColor=0a0b0f&color=13151c" />
+  <img alt="build" src="https://img.shields.io/badge/build-one_HTML-ff6b8a?style=flat&labelColor=0a0b0f" />
+</p>
+
+<br />
+
 # The Glass Transformer
 
-**A real GPT with glass walls — every number on screen is genuinely computed, live, in your browser.**
+**A real GPT with glass walls.** Every number is genuinely computed — live, in your browser.
 
-This is an interactive explainer of how transformers work. Instead of diagrams *about* the architecture, it runs an actual micro-GPT — **2 layers, 2 attention heads, 16 dimensions, ~7,500 parameters** — implemented from scratch in JavaScript, and makes every intermediate tensor inspectable: click any attention cell and see the exact q·k dot product that produced it, element by element.
+Not a diagram *about* transformers. A transformer you can open.
 
-## Features
+**[Open live demo →](https://himanshu-nakrani.github.io/glass-transformer/)** · **[Read `model.js`](./src/model.js)**
 
-- **🗺 The Map** — the full architecture with animated pulses riding the residual stream; every block is a door
-- **🔤 Tokenize → Embed** — real vocabulary IDs, real 16-dim embeddings (hover any cell for its exact value), sinusoidal position codes
-- **🔍 Attention microscopes** — a live heatmap per layer/head, a **dot-product microscope** (all 8 q·k element products, summed → ÷√d → + relative bias → softmax), and a **softmax microscope** showing all four steps
-- **🧠 Real head mechanisms** — a T5/ALiBi-style **position head**, a **content head** that routes by grammatical category, a pure ALiBi **recency head**, and one untrained head for contrast
-- **🔇 Ablation** — mute any head and watch the output distribution shift
-- **🌊 The Residual Stream + Logit Lens** — one token's vector at every checkpoint, plus what the model *would* predict at each depth — watch it change its mind layer by layer
-- **🎲 Generation** — real logits → temperature → top-k → sample; sampled words fly into the sentence; auto-write loop
-- **🎬 Cinematic guided tour** — a 14-beat narrated walkthrough that drives the app itself: spotlights panels, switches heads, demonstrates ablation, and ends by sampling a word live
-- **📖 Intuition layer** — hover glossary for every term (softmax, logit, layernorm…), plain-English "what am I looking at" lines, self-dismissing hints
+---
+
+## Why
+
+Most transformer explainers stop at arrows and boxes. This one **runs the math**.
+
+A micro-GPT — **2 layers · 2 heads · d=16 · 7,568 parameters** — from scratch in pure JavaScript. Click any attention cell for the exact **q·k** products. Mute a head; watch the distribution shift. Follow the residual stream with a live **logit lens**.
+
+Nothing is faked. The forward pass is real.
+
+## Specs
+
+| | |
+|:--|:--|
+| **Architecture** | Decoder-only GPT · causal · tied unembedding |
+| **Size** | 2 blocks · 2 heads · `d=16` · `d_h=8` · `d_ff=64` |
+| **Parameters** | **7,568** |
+| **Vocab** | ~79 tokens · grows as you type |
+| **Stack** | LayerNorm · GELU · temp / top‑k |
+| **Runtime** | Browser only · single HTML file |
+
+## What you get
+
+| | |
+|:--|:--|
+| **Map** | Architecture live; residual pulses; every block is a door |
+| **Tokenize → Embed** | Real IDs, 16‑d vectors, sinusoidal positions |
+| **Attention** | Heatmaps + microscope: `q·k → Σ → ÷√d → bias → softmax` |
+| **Heads** | Position (T5/ALiBi) · content · recency · untrained |
+| **Ablation** | Mute heads → distribution updates now |
+| **Stream + lens** | Vector + prediction at every depth |
+| **Generate** | Sample · auto-write · flying tokens |
+| **Tour** | 14-beat narrated walkthrough |
+
+## Heads
+
+| L | Head | Mechanism | Behavior |
+|:-:|------|-----------|----------|
+| 1 | **Position** | T5 / ALiBi bias | Peaks at Δ=1 |
+| 1 | **Content** | Category Q/K | Same-category routing |
+| 2 | **Recency** | Linear ALiBi | Prefers recent tokens |
+| 2 | **Untrained** | Random | Contrast baseline |
 
 ## Honesty
 
-The model is **untrained** — three heads are hand-crafted with real published mechanisms (T5 relative attention bias / ALiBi), the rest is seeded random. A toggleable grammar prior keeps auto-write readable; switch it off to see exactly what an untrained transformer believes. Nothing else is faked: the forward pass (layernorm → QKV → causal softmax attention → residual → GELU MLP → residual → tied unembedding) runs in full on every keystroke.
+The model is **untrained**. Three heads use published mechanisms (T5 / ALiBi); the rest is seeded random. A toggleable grammar prior keeps auto-write readable — switch it off to see raw untrained beliefs.
 
-## Run it
+```
+layernorm → QKV → causal softmax attention → residual
+         → GELU MLP → residual → tied unembedding
+```
+
+Full pass every keystroke. All intermediates cached and inspectable.
+
+## Run
 
 ```bash
 npm install
-npm run dev        # hot-reload dev server
-npm run build      # produces dist/index.html — a single self-contained file
+npm run dev      # hot-reload
+npm run build    # → dist/index.html  (one file)
 ```
 
-The build output is **one double-clickable HTML file** (via `vite-plugin-singlefile`) — no server needed.
+| Key | |
+|-----|--|
+| `←` `→` | Stages |
+| `Space` | Sample · pause tour |
+| `Esc` | Exit tour |
 
-## Stack
-
-React 18 · Vite 5 · Framer Motion 11 · no other runtime dependencies. The model core (`src/model.js`) is pure JavaScript with zero imports.
-
-## Architecture
+## Source
 
 ```
-src/
-├── model.js       # the micro-GPT: forward pass, attention, MLP, sampling — pure functions
-├── App.jsx        # state, generation loop, keyboard, stage router
-├── stages.jsx     # the 7 dissection stages
-├── hero.jsx       # scroll-driven landing with a constellation derived from real model weights
-├── tour.jsx       # guided-tour state machine + rAF-tracked spotlight overlay
-├── tourScript.jsx # the 14 tour beats
-├── fx.jsx         # flying sampled tokens, stage-transition ghosts
-├── glossary.jsx   # hover glossary + affordance hints
-└── ui.jsx         # shared primitives (NumberTicker, Switch, vector strips…)
+src/model.js         # the micro-GPT — pure JS, zero imports
+src/App.jsx          # state, generation, keyboard
+src/stages.jsx       # 7 dissection stages
+src/hero.jsx         # landing constellation
+src/tour.jsx         # tour machine + spotlight
+src/tourScript.jsx   # 14 beats
+src/fx.jsx           # flying tokens
+src/glossary.jsx     # hover terms
+src/ui.jsx           # primitives
+src/styles.css       # glass system
 ```
 
-## Keyboard
+React 18 · Vite 5 · Framer Motion 11 · no other runtime deps. Pages deploy on `main`.
 
-`←` `→` change stages · `Space` sample a token · during the tour: `Space` pause, `Esc` exit
+---
+
+> If you can click the number, you can trust the number.
+
+<p align="center">
+  <a href="https://himanshu-nakrani.github.io/glass-transformer/">Live demo</a>
+  ·
+  <a href="./src/model.js">Read the model</a>
+</p>
